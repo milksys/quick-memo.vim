@@ -9,6 +9,12 @@ function! s:activate_autocmds(bufnr)
       execute 'autocmd WinEnter <buffer=' . a:bufnr . '> nested call <SID>close_window(0)'
       execute 'autocmd Winleave <buffer=' . a:bufnr . '> nested call <SID>close_window(1)'
     augroup END
+  else
+    augroup SaveScratch
+      autocmd!
+      execute 'autocmd BufLeave <buffer=' . a:bufnr . '> nested call <SID>save_scratch()'
+      execute 'autocmd VimLeavePre <buffer=' . a:bufnr . '> nested call <SID>save_scratch()'
+    augroup END
   endif
 endfunction
 
@@ -55,6 +61,13 @@ function! s:open_window(position)
       let cmd = g:scratch_horizontal ? 'split' : 'vsplit'
       execute a:position . s:resolve_size(g:scratch_height) . cmd . ' +buffer' . scr_bufnr
     endif
+  endif
+endfunction
+
+function! s:save_scratch()
+  " saves scratch to file
+  if strlen(g:scratch_persistence_file) > 0
+    execute ':w! ' . g:scratch_persistence_file
   endif
 endfunction
 
